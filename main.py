@@ -7,7 +7,7 @@ import os
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-file', required=False, action="store", type=str,
+    parser.add_argument('-file', required=True, action="store", type=str,
                         help='path to input file')
     parser.add_argument('--save', required=False, action="store_true", default=False,
                         help='processed image will be saved')
@@ -30,14 +30,14 @@ def preprocess(img, threshold):
     return img
 
 
-def clean(img, kernel_size, show=True, save=False, file_path=None):
+def clean(img, kernel_size, show=True, save=False, filepath=None):
     # below can be used for erosion experiments
     # img_eroded = cv2.erode(img, np.ones((2, 2)))
     # dilated results are preferred, kernel size and number of iterations decided experimentally
     img_dilated = cv2.dilate(img, kernel=np.ones(kernel_size, np.uint8), iterations=1)
 
     if save:
-        filename, file_extension = os.path.splitext(args.file)
+        filename, file_extension = os.path.splitext(filepath)
         save_path = filename + "_processed" + file_extension
         cv2.imwrite(save_path, img_dilated * 255)
 
@@ -84,7 +84,8 @@ if __name__ == '__main__':
 
     im = cv2.imread(args.file)
     im = preprocess(im, threshold=128)
-    im = clean(im, kernel_size=(2, 2), show=not args.no_display, save=args.save, file_path=args.file)  # dilation & erosion kernel
+    # set dilation & erosion kernel
+    im = clean(im, kernel_size=(2, 2), show=not args.no_display, save=args.save, filepath=args.file)
     number_components = label_connected_components(im)
     print("Number of components: " + str(number_components))
 
